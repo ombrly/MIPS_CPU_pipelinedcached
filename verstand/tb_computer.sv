@@ -42,7 +42,7 @@ module tb_computer;
         reset = 0;
 
         // Failsafe timeout to prevent infinite simulation loops
-        #10000;
+        #50000;
         $display("ERROR: Simulation Timed Out.");
         $finish;
     end

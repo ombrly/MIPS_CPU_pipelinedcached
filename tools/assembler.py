@@ -11,9 +11,10 @@ registers = {
     '$0': 0, '$2': 2, '$3': 3, '$4': 4, '$5': 5, '$7': 7, '$8': 8, '$9': 9
 }
 
-r_type = {'add': 0x20, 'sub': 0x22, 'and': 0x24, 'or': 0x25, 'slt': 0x2A, 'mult': 0x18, 'mflo': 0x12, 'mfhi': 0x10, 'srl': 0x02}
-i_type = {'lw': 0x23, 'sw': 0x2B, 'beq': 0x04, 'addi': 0x08}
-j_type = {'j': 0x02}
+# UPDATED: Added 'jr': 0x08
+r_type = {'add': 0x20, 'sub': 0x22, 'and': 0x24, 'or': 0x25, 'slt': 0x2A, 'mult': 0x18, 'mflo': 0x12, 'mfhi': 0x10, 'srl': 0x02, 'jr': 0x08}
+i_type = {'lw': 0x23, 'sw': 0x2B, 'beq': 0x04, 'addi': 0x08, 'lui': 0x0F, 'ori': 0x0D}
+j_type = {'j': 0x02, 'jal': 0x03}
 
 def get_reg(v):
     if v in registers: return registers[v]
@@ -77,13 +78,18 @@ def assemble(asm_file, exe_file):
                 rs = 0
                 rt = get_reg(parts[2])
                 shamt = int(parts[3])
+            # UPDATED: Added parsing block for 'jr'
+            elif op == 'jr':
+                # jr rs -> rt=0, rd=0
+                rs = get_reg(parts[1])
+                rt = 0
+                rd = 0
             else:
                 # op rd, rs, rt
                 rd = get_reg(parts[1])
                 rs = get_reg(parts[2])
                 rt = get_reg(parts[3])
                 
-            # UPDATED: Replaced (0 << 6) with ((shamt & 0x1F) << 6)
             code = (0 << 26) | (rs << 21) | (rt << 16) | (rd << 11) | ((shamt & 0x1F) << 6) | r_type[op]
             
         elif op in i_type:
@@ -107,6 +113,18 @@ def assemble(asm_file, exe_file):
                 rt = get_reg(parts[1])
                 rs = get_reg(parts[2])
                 imm = int(parts[3])
+                code = (i_type[op] << 26) | (rs << 21) | (rt << 16) | (imm & 0xFFFF)
+            elif op == 'lui':
+                # lui rt, imm -> rs is 0
+                rt = get_reg(parts[1])
+                imm = int(parts[2], 0) # Base 0 allows parsing hex (0x...) or decimal
+                rs = 0
+                code = (i_type[op] << 26) | (rs << 21) | (rt << 16) | (imm & 0xFFFF)
+            elif op == 'ori':
+                # ori rt, rs, imm
+                rt = get_reg(parts[1])
+                rs = get_reg(parts[2])
+                imm = int(parts[3], 0)
                 code = (i_type[op] << 26) | (rs << 21) | (rt << 16) | (imm & 0xFFFF)
         elif op in j_type:
             target = labels[parts[1]]
