@@ -90,15 +90,15 @@ Immediate size: 16 bits, sign-extended to 32 bits for operations
 | ------ | ------- |
 | 6 bits | 26 bits |
 
-## Memory Design and Implementation
+# Memory Design and Implementation
 
-# Instruction Memory: imem
+## Instruction Memory: imem
 
 - Instruction memory stores the 32-bit machine code instructions generated from the assembly programs.
 - The program counter determines which instruction is read.
 - Each instruction is word-aligned, so the PC normally increments by 4.
 
-# Data Memory: dmem
+## Data Memory: dmem
 
 - Data memory stores 32-bit values used by load and store instructions.
 - For lw, the CPU reads from data memory.
@@ -126,7 +126,7 @@ Instruction memory and data memory are separate.
 The testbench halts the simulation when the CPU writes to address:
 ``` 252 decimal = 0x000000FC ```
 
-# Program Load into Processor
+## Program Load into Processor
 
 Assembly programs are stored in the programs/ folder. The assembler script converts an assembly file into an executable machine-code file. The Makefile assembles a selected program, compiles the CPU simulation, and runs the testbench.
 
@@ -135,11 +135,11 @@ Default program:
 To select a different program:
 ``` make ASM=program_name_without_extension ```
 
-## Process Design and Implementation
+# Process Design and Implementation
 
-# Control Signals
+## Control Signals
 
-# RegDst
+## RegDst
 This controls which register is written.
 | RegDst | Effect                       |
 | ------ | ---------------------------- |
