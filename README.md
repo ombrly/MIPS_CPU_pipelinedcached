@@ -45,7 +45,7 @@ tb_computer.sv:64: $finish called at 2100 (100ps)
 ![R-Type Timing Diagram](https://github.com/ombrly/MIPS_CPU_pipelinedcached/blob/main/Screenshot%202026-05-15%20194105.png?raw=true)
 
 ### I-Type Timing Diagram
-![I-Type Timing Diagram]()
+![I-Type Timing Diagram](https://github.com/ombrly/MIPS_CPU_pipelinedcached/blob/main/Screenshot%202026-05-15%20194907.png?raw=true)
 
 ### J-Type Timing Diagram
 ![J-Type Timing Diagram]()
