@@ -42,6 +42,8 @@ tb_computer.sv:64: $finish called at 2100 (100ps)
 ![Overall CPU Diagram](https://github.com/ombrly/MIPS_CPU_pipelinedcached/blob/main/overalldiagram.jpg?raw=true)
 
 
+![R-Type Timing Diagram](https://github.com/ombrly/MIPS_CPU_pipelinedcached/blob/main/image.png?raw=true)
+
 
 ## Supported Instructions
 
