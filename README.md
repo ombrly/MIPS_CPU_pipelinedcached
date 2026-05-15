@@ -47,7 +47,7 @@ Based on the main decoder and ALU decoder, the supported instructions are:
 
 ### Overall Design Diagrams
 
-![Overall CPU Diagram](https://github.com/ombrly/MIPS_CPU_pipelinedcached/blob/main/diagram.jpeg?raw=true)
+![Overall CPU Diagram]()
 
 
 ## ISA Design
