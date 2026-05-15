@@ -47,7 +47,7 @@ Based on the main decoder and ALU decoder, the supported instructions are:
 
 ### Overall Design Diagrams
 
-![Overall CPU Diagram](https://imgur.com/a/6UlbeGl)
+![Overall CPU Diagram](https://i.imgur.com/a/6UlbeGl.png)
 
 
 ## ISA Design
