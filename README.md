@@ -47,10 +47,8 @@ Based on the main decoder and ALU decoder, the supported instructions are:
 
 ### Overall Design Diagrams
 
-```md
-![Overall CPU Diagram](docs/images/overall_cpu_diagram.png)
+![Overall CPU Diagram](https://imgur.com/a/6UlbeGl)
 
-```
 
 ## ISA Design
 
@@ -74,37 +72,37 @@ PC increment: 4 bytes
 
 Immediate size: 16 bits, sign-extended to 32 bits for operations
 
-## R-Type Instruction Format
+### R-Type Instruction Format
 
 | op     | rs     | rt     | rd     | shamt  | funct  |
 | ------ | ------ | ------ | ------ | ------ | ------ |
 | 6 bits | 5 bits | 5 bits | 5 bits | 5 bits | 6 bits |
 
-## I-Type Instruction Format
+### I-Type Instruction Format
 | op     | rs     | rt     | immediate/address |
 | ------ | ------ | ------ | ----------------- |
 | 6 bits | 5 bits | 5 bits | 16 bits           |
 
-## J-Type Instruction Format
+### J-Type Instruction Format
 | op     | address |
 | ------ | ------- |
 | 6 bits | 26 bits |
 
-# Memory Design and Implementation
+## Memory Design and Implementation
 
-## Instruction Memory: imem
+### Instruction Memory: imem
 
 - Instruction memory stores the 32-bit machine code instructions generated from the assembly programs.
 - The program counter determines which instruction is read.
 - Each instruction is word-aligned, so the PC normally increments by 4.
 
-## Data Memory: dmem
+### Data Memory: dmem
 
 - Data memory stores 32-bit values used by load and store instructions.
 - For lw, the CPU reads from data memory.
 - For sw, the CPU writes to data memory.
 
-# Cache Memory: cache_direct_mapped
+### Cache Memory: cache_direct_mapped
 
 The CPU includes a direct-mapped cache between the processor and data memory.
 
@@ -118,7 +116,7 @@ The cache uses the following address breakdown:
 The cache has 16 lines because the index is 4 bits. On a cache hit, the data is returned without stalling the pipeline.
 On a cache miss, the cache asserts mem_stall, which freezes the pipeline while data is fetched from main memory. The cache uses a write-through policy for store instructions.
 
-# Memory Layout
+### Memory Layout
 Instruction memory and data memory are separate.
 - Instruction memory stores assembled machine code.
 - Data memory stores values used by lw and sw.
@@ -126,7 +124,7 @@ Instruction memory and data memory are separate.
 The testbench halts the simulation when the CPU writes to address:
 ``` 252 decimal = 0x000000FC ```
 
-## Program Load into Processor
+### Program Load into Processor
 
 Assembly programs are stored in the programs/ folder. The assembler script converts an assembly file into an executable machine-code file. The Makefile assembles a selected program, compiles the CPU simulation, and runs the testbench.
 
@@ -135,18 +133,18 @@ Default program:
 To select a different program:
 ``` make ASM=program_name_without_extension ```
 
-# Process Design and Implementation
+## Process Design and Implementation
 
-## Control Signals
+### Control Signals
 
-## RegDst
+### RegDst
 This controls which register is written.
 | RegDst | Effect                       |
 | ------ | ---------------------------- |
 | 0      | Destination register is `rt` |
 | 1      | Destination register is `rd` |
 
-# Jump
+### Jump
 This controls jump behavior.
 | Jump | Effect                                   |
 | ---- | ---------------------------------------- |
@@ -154,7 +152,7 @@ This controls jump behavior.
 | 1    | PC jumps to jump address                 |
 Jump address: ```{PCPlus4[31:28], instr[25:0], 2'b00}```
 
-# Branch 
+### Branch 
 This was used for beq
 | Branch | Equal | Effect                        |
 | ------ | ----- | ----------------------------- |
@@ -163,18 +161,18 @@ This was used for beq
 | 1      | 1     | PC branches to target address |
 Branch Address: ```PCPlus4 + (sign-extended immediate << 2)```
 
-#MemRead
+### MemRead
 The cache/memory system uses this signal.
 | MemRead | Effect                      |
 | ------- | --------------------------- |
 | 0       | No memory read              |
 | 1       | Read data from memory/cache |
 
-# MemWrite
+### MemWrite
 | MemWrite | Effect                     |
 | -------- | -------------------------- |
 | 0        | No memory write            |
 | 1        | Write data to memory/cache |
 
-# MemtoReg
-Controls 
+### Mem     
+ontrols 
