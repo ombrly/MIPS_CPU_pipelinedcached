@@ -28,7 +28,7 @@ make run
 
 ### Overall Design Diagrams
 
-![Overall CPU Diagram](https://github.com/ombrly/MIPS_CPU_pipelinedcached/blob/main/diagram.jpg?raw=true)
+![Overall CPU Diagram](https://github.com/ombrly/MIPS_CPU_pipelinedcached/blob/main/overalldiagram.jpg?raw=true)
 
 
 
