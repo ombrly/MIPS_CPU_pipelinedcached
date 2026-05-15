@@ -25,6 +25,17 @@ make run
 ```
 
  Program Output:
+ ```
+--- Running simulation ---
+vvp cpu_sim +PROG=../programs/prog1_simple_hazard.exe
+WARNING: ./imem.sv:15: $readmemh(../programs/prog1_simple_hazard.exe): Not enough words in the file for the requested range [0:255].
+VCD info: dumpfile tb_computer.vcd opened for output.
+--------------------------------------------------
+Simulation Halted by Software.
+CPU wrote value [0] to universal halt address 252 (0xFC).
+--------------------------------------------------
+tb_computer.sv:64: $finish called at 2100 (100ps)
+```
 
 ### Overall Design Diagrams
 
