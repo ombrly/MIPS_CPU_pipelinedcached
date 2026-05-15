@@ -1,9 +1,6 @@
 # programs/challenge_rsqrt.asm
-# Hardware-Accurate Version (Bypasses missing LUI, ORI, and JR hardware)
-# Hex values converted to Base-10 to support your python assembler.
 
 main:
-    # 1. Initialize 65536 multiplier in $k0 to bypass missing LUI hardware
     addi $k0, $zero, 256
     mult $k0, $k0
     mflo $k0
@@ -16,20 +13,20 @@ main:
     # 3. $sp = 0x00E0
     addi $sp, $zero, 224
 
-    # 4. Call q_rsqrt
-    j q_rsqrt
+    # 4. Call q_rsqrt natively
+    jal  q_rsqrt
 
-ret_main:
     # 5. Halt
     addi $t0, $zero, 252
-    sw  $v0, 0($t0)         
+    sw  $v0, 0($t0)        
     
 halt:
-    j halt
+    j    halt
 
 # ----------------------------------------------------
 q_rsqrt:
     addi $sp, $sp, -16
+    sw   $ra, 12($sp)       # Save Return Address!
     sw   $s0, 8($sp)
     sw   $s1, 4($sp)
     sw   $s2, 0($sp)
@@ -49,44 +46,40 @@ q_rsqrt:
     add  $t2, $t2, $t8       
     sub  $s1, $t2, $t1       
 
-    # STEP 3.1: fmul
+    # fmul 1
     add  $a0, $s1, $0        
     add  $a1, $s1, $0        
-    addi $k1, $zero, 1      # Set Return ID 1
-    j    fmul_emulate        
-ret_1:
+    jal  fmul_emulate        
     add  $s2, $v0, $0        
 
-    # STEP 3.2: fmul
+    # fmul 2
     add  $a0, $s0, $0        
     add  $a1, $s2, $0        
-    addi $k1, $zero, 2      # Set Return ID 2
-    j    fmul_emulate
-ret_2:
+    jal  fmul_emulate
     add  $s2, $v0, $0        
 
-    # STEP 3.3: fsub ($a0 = 0x3FC00000)
+    # fsub ($a0 = 0x3FC00000)
     addi $a0, $zero, 16320      # 0x3FC0
     mult $a0, $k0
     mflo $a0
     add  $a1, $s2, $0
-    j    fsub_emulate
-ret_sub_1:
+    jal  fsub_emulate
     add  $s2, $v0, $0        
 
-    # STEP 3.4: fmul
+    # fmul 3
     add  $a0, $s1, $0
     add  $a1, $s2, $0
-    addi $k1, $zero, 3      # Set Return ID 3
-    j    fmul_emulate
-ret_3:
+    jal  fmul_emulate
 
-    # EPILOGUE 
+    # Restore $ra and $s registers from stack
+    lw   $ra, 12($sp)       # Restore Return Address!
     lw   $s0, 8($sp)
     lw   $s1, 4($sp)
     lw   $s2, 0($sp)
     addi $sp, $sp, 16
-    j    ret_main
+    
+    # Return to main
+    jr   $ra
 
 # ----------------------------------------------------
 fmul_emulate:
@@ -170,13 +163,8 @@ fmul_pack:
     
     or   $v0, $t3, $t5
     
-    # Software Return Mux
-    addi $t9, $zero, 1
-    beq  $k1, $t9, ret_1
-    addi $t9, $zero, 2
-    beq  $k1, $t9, ret_2
-    addi $t9, $zero, 3
-    beq  $k1, $t9, ret_3
+    # Hardware dynamic return
+    jr   $ra
 
 # ----------------------------------------------------
 fsub_emulate:
@@ -254,8 +242,11 @@ fsub_pack:
     mflo $t3
     
     or   $v0, $t3, $t5
-    j    ret_sub_1
+    
+    # Hardware dynamic return
+    jr   $ra
     
 fsub_zero:
     add  $v0, $0, $0
-    j    ret_sub_1
+    # Hardware dynamic return
+    jr   $ra

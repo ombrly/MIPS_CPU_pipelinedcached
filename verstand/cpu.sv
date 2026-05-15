@@ -15,7 +15,7 @@ module cpu(
 );
     // Internal interconnects
     logic [31:0] instrD;
-    logic branchD, jumpD;
+    logic branchD, jumpD, jalD, jrD;
     logic memtoregD, memwriteD, alusrcD, regdstD, regwriteD;
     logic [3:0] alucontrolD;
     logic stallF, stallD, stallE, stallM, stallW, flushD, flushE;
@@ -31,7 +31,7 @@ module cpu(
         .opD(instrD[31:26]), .functD(instrD[5:0]),
         .memtoregD(memtoregD), .memwriteD(memwriteD),
         .alusrcD(alusrcD), .regdstD(regdstD), .regwriteD(regwriteD),
-        .branchD(branchD), .jumpD(jumpD),
+        .branchD(branchD), .jumpD(jumpD), .jalD(jalD), .jrD(jrD),
         .alucontrolD(alucontrolD)
     );
 
@@ -41,7 +41,7 @@ module cpu(
         .aluoutM(aluoutM), .writedataM(writedataM), .readdataM(readdataM),
         .memtoregD(memtoregD), .memwriteD(memwriteD),
         .alusrcD(alusrcD), .regdstD(regdstD), .regwriteD(regwriteD),
-        .branchD(branchD), .jumpD(jumpD), .alucontrolD(alucontrolD),
+        .branchD(branchD), .jumpD(jumpD), .jalD(jalD), .jrD(jrD), .alucontrolD(alucontrolD),
         .instrD(instrD),
         .stallF(stallF), .stallD(stallD), .stallE(stallE), .stallM(stallM), .stallW(stallW), .flushE(flushE), .flushD(flushD),
         .Exception_Flag(Exception_Flag),
@@ -60,7 +60,7 @@ module cpu(
         .rsD(rsD), .rtD(rtD), .rsE(rsE), .rtE(rtE),
         .writeregE(writeregE), .writeregM(writeregM), .writeregW(writeregW),
         .regwriteE(regwriteE), .regwriteM(regwriteM), .regwriteW(regwriteW),
-        .memtoregE(memtoregE), .memtoregM(memtoregM), .branchD(branchD),
+        .memtoregE(memtoregE), .memtoregM(memtoregM), .branchD(branchD), .jrD(jrD),
         .intr(intr),
         .forwardaD(forwardaD), .forwardbD(forwardbD),
         .forwardaE(forwardaE), .forwardbE(forwardbE),

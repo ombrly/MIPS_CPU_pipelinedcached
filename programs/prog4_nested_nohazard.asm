@@ -1,4 +1,4 @@
-# prog3_nested_nohazard.asm
+# prog4_nested_nohazard.asm
 # Nested procedure execution cleanly hopping scopes without RAW or control faults
 
 main:

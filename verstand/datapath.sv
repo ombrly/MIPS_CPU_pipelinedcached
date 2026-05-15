@@ -20,7 +20,7 @@ module datapath(
     // Control signals from Decode
     input  logic        memtoregD, memwriteD,
     input  logic        alusrcD, regdstD, regwriteD,
-    input  logic        jumpD, branchD,
+    input  logic        jumpD, branchD, jalD, jrD,
     input  logic [3:0]  alucontrolD,
     output logic [31:0] instrD,
 
@@ -37,6 +37,7 @@ module datapath(
     output logic        memtoregE, memtoregM,
     output logic        memwriteM_out
 );
+
     // FETCH STAGE (IF)
     logic [31:0] pcnextFD, pcnextbrFD, pcplus4F, pcbranchD;
     logic pcsrcD;
@@ -45,11 +46,13 @@ module datapath(
 
     //jump vs branch
     mux2 #(32) pcbrmux(pcplus4F, pcbranchD, pcsrcD, pcnextbrFD);
+
     assign pcjumpFD = {pcplus4D[31:28], instrD[25:0], 2'b00};
 
     always_comb begin
         if (Exception_Flag) pcnextFD = 32'h8000_0180; // Hardware exception vector
-        else if (jumpD)     pcnextFD = pcjumpFD;
+        else if (jrD)       pcnextFD = compaD;        // Jump Register targets $rs
+        else if (jumpD)     pcnextFD = pcjumpFD;      // Jump / JAL target
         else                pcnextFD = pcnextbrFD;
     end
 
@@ -66,7 +69,7 @@ module datapath(
             instrD   <= 32'b0;
             pcplus4D <= 32'b0;
         end else if (~stallD) begin
-            instrD   <= (pcsrcD || jumpD) ? 32'b0 : instrF; // Flush dynamically on branch/jump
+            instrD   <= (pcsrcD || jumpD || jrD) ? 32'b0 : instrF; // Flush dynamically on branch/jump/jr
             pcplus4D <= pcplus4F;
         end
     end
@@ -95,6 +98,7 @@ module datapath(
     
     assign pcsrcD = branchD & equalD;
     assign signimmshD = signimmD << 2;
+
     assign pcbranchD = pcplus4D + signimmshD;
     signext se(instrD[15:0], signimmD);
 
@@ -102,7 +106,7 @@ module datapath(
     logic [31:0] srcaE, srcbE, signimmE;
     logic [4:0]  rdE;
     logic [4:0]  shamtE;
-    logic memwriteE, alusrcE, regdstE;
+    logic memwriteE, alusrcE, regdstE, jalE;
     logic [3:0] alucontrolE;
     logic [31:0] pcplus4E;
 
@@ -113,6 +117,7 @@ module datapath(
             memwriteE   <= 0;
             alusrcE     <= 0;
             regdstE     <= 0;
+            jalE        <= 0;
             alucontrolE <= 0;
             srcaE       <= 0;
             srcbE       <= 0;
@@ -120,7 +125,7 @@ module datapath(
             rsE         <= 0;
             rtE         <= 0;
             rdE         <= 0;
-            shamtE      <= 0; 
+            shamtE      <= 0;
             pcplus4E    <= 0;
         end else if (~stallE) begin
             regwriteE   <= regwriteD;
@@ -128,6 +133,7 @@ module datapath(
             memwriteE   <= memwriteD;
             alusrcE     <= alusrcD;
             regdstE     <= regdstD;
+            jalE        <= jalD;
             alucontrolE <= alucontrolD;
             srcaE       <= srcaD;
             srcbE       <= srcbD;
@@ -144,15 +150,20 @@ module datapath(
     logic [31:0] srca2E, srcb2E, srcb3E;
     logic [31:0] aluoutE;
     logic zeroE; 
+    logic [4:0] writereg_muxE;
     
     // ALU Forwarding Muxes
     mux3 #(32) forwardamux(srcaE, resultW, aluoutM, forwardaE, srca2E);
     mux3 #(32) forwardbmux(srcbE, resultW, aluoutM, forwardbE, srcb2E);
+    
     mux2 #(32) srcbmux(srcb2E, signimmE, alusrcE, srcb3E);
-    
+
     alu alu(clk, srca2E, srcb3E, shamtE, alucontrolE, aluoutE, zeroE);
-    mux2 #(5) wrmux(rtE, rdE, regdstE, writeregE);
     
+    // Write Register selection (Overrides to $ra / 31 for JAL)
+    mux2 #(5) wrmux(rtE, rdE, regdstE, writereg_muxE);
+    assign writeregE = jalE ? 5'd31 : writereg_muxE;
+
     // Exception tracking
     logic [31:0] EPC;
     always_ff @(posedge clk or posedge reset) begin
@@ -164,49 +175,63 @@ module datapath(
     end
 
     // EX/MEM PIPELINE REGISTER 
+    logic jalM;
+    logic [31:0] pcplus4M;
+    
     always_ff @(posedge clk or posedge reset) begin
         if (reset) begin
             regwriteM <= 0;
             memtoregM <= 0;
             memwriteM_out <= 0;
+            jalM      <= 0;
             aluoutM   <= 0;
             writedataM<= 0;
             writeregM <= 0;
+            pcplus4M  <= 0;
         end else if (~stallM) begin
             regwriteM <= regwriteE;
             memtoregM <= memtoregE;
             memwriteM_out <= memwriteE;
+            jalM      <= jalE;
             aluoutM   <= aluoutE;
             writedataM<= srcb2E; // Forwarded write data for store instructions
             writeregM <= writeregE;
+            pcplus4M  <= pcplus4E;
         end
     end
 
-    // MEMORY STAGE (MEM)
-    // Note: Actual memory interaction occurs in computer.sv via dmem.sv/caches.
-
     // MEM/WB PIPELINE R's
-    logic memtoregW;
-    logic [31:0] readdataW, aluoutW;
-    
+    logic memtoregW, jalW;
+    logic [31:0] readdataW, aluoutW, pcplus4W;
+
     always_ff @(posedge clk or posedge reset) begin
         if (reset) begin
             regwriteW <= 0;
             memtoregW <= 0;
+            jalW      <= 0;
             readdataW <= 0;
             aluoutW   <= 0;
             writeregW <= 0;
+            pcplus4W  <= 0;
         end else if (~stallW) begin
             regwriteW <= regwriteM;
             memtoregW <= memtoregM;
+            jalW      <= jalM;
             readdataW <= readdataM; // Data retrieved from cache/memory
             aluoutW   <= aluoutM;
             writeregW <= writeregM;
+            pcplus4W  <= pcplus4M;
         end
     end
 
     // WRITEBACK STAGE (WB)
-    mux2 #(32) resmux(aluoutW, readdataW, memtoregW, resultW);
+    logic [31:0] resultW_mux;
+    
+    // Choose between ALU result and Memory Read Data
+    mux2 #(32) resmux(aluoutW, readdataW, memtoregW, resultW_mux);
+    
+    // Override result to PC+4 for JAL
+    assign resultW = jalW ? pcplus4W : resultW_mux;
 
 endmodule
 `endif // DATAPATH_SV

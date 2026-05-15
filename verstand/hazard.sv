@@ -6,7 +6,7 @@ module hazard (
     input  logic [4:0] writeregE, writeregM, writeregW,
     input  logic       regwriteE, regwriteM, regwriteW,
     input  logic       memtoregE, memtoregM,
-    input  logic       branchD,
+    input  logic       branchD, jrD,
     input  logic       intr,
     input  logic       mem_stall,
     output logic       forwardaD, forwardbD,
@@ -14,7 +14,6 @@ module hazard (
     output logic       stallF, stallD, stallE, stallM, stallW, flushD, flushE,
     output logic       Exception_Flag
 );
-
     // 1. Forwarding to Execute stage (ALU inputs)
     always_comb begin
         forwardaE = 2'b00;
@@ -31,7 +30,7 @@ module hazard (
         end
     end
 
-    // 2. Forwarding to Decode stage (Branch equality checks)
+    // 2. Forwarding to Decode stage (Branch equality & JR checks)
     assign forwardaD = (rsD != 0) && (rsD == writeregM) && regwriteM;
     assign forwardbD = (rtD != 0) && (rtD == writeregM) && regwriteM;
 
@@ -41,12 +40,12 @@ module hazard (
 
     // Load-use data hazard stalling
     assign lwstall = memtoregE && (rtE == rsD || rtE == rtD);
-    
-    // Branch hazard stalling (if branch evaluates in ID, must wait for precise conditions)
-    assign branchstall = branchD &&
-             (regwriteE && (writeregE == rsD || writeregE == rtD) ||
-              memtoregM && (writeregM == rsD || writeregM == rtD));
-              
+
+    // Branch/JR hazard stalling (if resolving in ID, must wait for precise conditions)
+    assign branchstall = (branchD || jrD) &&
+             (regwriteE && (writeregE == rsD || (branchD && writeregE == rtD)) ||
+              memtoregM && (writeregM == rsD || (branchD && writeregM == rtD)));
+
     assign Exception_Flag = intr;
 
     // Global stall triggers (including Cache mem_stall)
@@ -59,11 +58,11 @@ module hazard (
     assign stallW = mem_stall;
     
     // Clear Decode on exception, unless frozen
-    assign flushD = Exception_Flag && !mem_stall;  
-    
+    assign flushD = Exception_Flag && !mem_stall;
+
     // Clear Execute on data stall or exception, unless frozen
     assign flushE = (lwstall || branchstall || Exception_Flag) && !mem_stall;
-    
+
 endmodule
 
 `endif // HAZARD_SV

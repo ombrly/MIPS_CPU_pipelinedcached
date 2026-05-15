@@ -27,12 +27,12 @@ module tb_computer;
     end
 
     // Simulation stimulus and configuration
+    // Simulation stimulus and configuration
     initial begin
         // Generate waveform file for GTKWave verification
         $dumpfile("tb_computer.vcd");
         $dumpvars(0, tb_computer);
 
-        // Initialize system inputs
         intr     = 0;
         cache_en = 1; 
         reset    = 1;
@@ -40,7 +40,12 @@ module tb_computer;
         // Hold reset high for a few cycles to clear pipeline registers
         #22;
         reset = 0;
-
+        // Wait for the CPU to enter the infinite loop
+        #200; 
+        // Fire the hardware interrupt for one clock cycle
+        intr = 1;
+        #10;      
+        intr = 0;
         // Failsafe timeout to prevent infinite simulation loops
         #50000;
         $display("ERROR: Simulation Timed Out.");

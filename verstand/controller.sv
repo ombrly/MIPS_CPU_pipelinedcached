@@ -8,10 +8,9 @@ module controller(
     input  logic [5:0] opD, functD,
     output logic       memtoregD, memwriteD,
     output logic       alusrcD, regdstD, regwriteD,
-    output logic       jumpD, branchD,
+    output logic       jumpD, branchD, jalD, jrD,
     output logic [3:0] alucontrolD
 );
-
     logic [1:0] aluopD;
 
     // Main Decoder
@@ -24,6 +23,7 @@ module controller(
         .regdst(regdstD),
         .regwrite(regwriteD),
         .jump(jumpD),
+        .jal(jalD),
         .aluop(aluopD)
     );
 
@@ -33,6 +33,8 @@ module controller(
         .aluop(aluopD),
         .alucontrol(alucontrolD)
     );
+    // just for jr
+    assign jrD = (opD == 6'b000000) && (functD == 6'b001000);
 
 endmodule
 

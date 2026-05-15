@@ -58,8 +58,10 @@ def assemble(asm_file, exe_file):
     for pc, inst in instructions:
         parts = [p.strip() for p in re.split(r'[\s,]+', inst) if p.strip()]
         op = parts[0]
+        if op == 'nop':
+            code = 0x00000000
         
-        if op in r_type:
+        elif op in r_type:
             shamt = 0  # Default shift amount is 0
             
             if op == 'mult':
