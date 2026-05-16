@@ -39,6 +39,8 @@ tb_computer.sv:64: $finish called at 2100 (100ps)
 ```
 Tha return value of 0 shows that the CPU is done computing.
 
+Youtube Demo: https://youtu.be/ozOUmoPpQmo 
+
 ### Overall Design Diagrams
 
 ![Overall CPU Diagram](https://github.com/ombrly/MIPS_CPU_pipelinedcached/blob/main/overalldiagram.jpg?raw=true)
