@@ -68,7 +68,7 @@ Based on the main decoder and ALU decoder, the supported instructions are:
 - div
 - mfhi
 - mflo
--jr
+- jr
 
 ### I-Type Instructions
 
