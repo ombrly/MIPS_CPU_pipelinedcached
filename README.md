@@ -17,6 +17,7 @@ The main decoder reads the opcode in the instruction and generates the high-leve
 This CPU also includes hazard handling and direct-mapped cache support. The hazard unit is responsible for stalls, flushes, and forwarding. The cache module is used between the CPU and data memory to support faster memory access on hits and pipeline stalls on misses.
 
 ### Instructions to Run Demo
+In the Programs file, 
 ```
 cd MIPS_CPU_pipelinedcached/verstand
 make asm
@@ -24,7 +25,7 @@ make compile
 make run
 ```
 
- Program Output:
+ CPU Output:
  ```
 --- Running simulation ---
 vvp cpu_sim +PROG=../programs/prog1_simple_hazard.exe
@@ -35,6 +36,11 @@ Simulation Halted by Software.
 CPU wrote value [0] to universal halt address 252 (0xFC).
 --------------------------------------------------
 tb_computer.sv:64: $finish called at 2100 (100ps)
+```
+Program Output:
+```
+
+
 ```
 
 ### Overall Design Diagrams
@@ -50,7 +56,7 @@ tb_computer.sv:64: $finish called at 2100 (100ps)
 ### J-Type Timing Diagram
 ![J-Type Timing Diagram](https://github.com/ombrly/MIPS_CPU_pipelinedcached/blob/main/image.png?raw=true)
 
-### Timing Diagrams Output
+### Timing Diagrams Instructions
 ```
 00000020   add  $zero, $zero, $zero  
 00000020   add  $zero, $zero, $zero
