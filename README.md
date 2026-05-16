@@ -50,6 +50,48 @@ tb_computer.sv:64: $finish called at 2100 (100ps)
 ### J-Type Timing Diagram
 ![J-Type Timing Diagram](https://github.com/ombrly/MIPS_CPU_pipelinedcached/blob/main/image.png?raw=true)
 
+### Timing Diagrams Output
+```
+00000020   add  $zero, $zero, $zero  
+00000020   add  $zero, $zero, $zero
+
+2008000a   addi $t0, $zero, 10
+20090005   addi $t1, $zero, 5
+
+01095020   add  $t2, $t0, $t1        # R-type: 10 + 5 = 15
+01095822   sub  $t3, $t0, $t1        # R-type: 10 - 5 = 5
+01096024   and  $t4, $t0, $t1
+01096825   or   $t5, $t0, $t1
+0128702a   slt  $t6, $t1, $t0
+00087842   srl  $t7, $t0, 1
+
+00000020   
+00000020
+00000020
+
+201000a0   addi $s0, $zero, 160      # memory base address
+2011002a   addi $s1, $zero, 42
+
+ae110000   sw   $s1, 0($s0)          # I-type store
+8e120000   lw   $s2, 0($s0)          # I-type load
+12320003   beq  $s1, $s2, offset 3   # I-type branch
+
+00009820   add  $s3, $zero, $zero    
+00000020
+00000020
+
+08000017   j    address 0x17         # J-type jump
+
+20020063   addi $v0, $zero, 99       # skipped by jump
+00000020
+00000020
+
+200800fc   addi $t0, $zero, 252
+ad000000   sw   $zero, 0($t0)        # write 0 to halt address 0xFC
+
+0800001b   j    halt                 # infinite halt loop / safety jump
+```
+
 
 ## Supported Instructions
 
