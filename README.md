@@ -37,11 +37,7 @@ CPU wrote value [0] to universal halt address 252 (0xFC).
 --------------------------------------------------
 tb_computer.sv:64: $finish called at 2100 (100ps)
 ```
-Program Output:
-```
-
-
-```
+Tha return value of 0 shows that the CPU is done computing.
 
 ### Overall Design Diagrams
 
